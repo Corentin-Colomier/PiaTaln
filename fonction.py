@@ -105,16 +105,13 @@ def creer_objet_deja_ecri(mot):
             print("le mot ne possede pas de fichier")
             return None
 
-    # curdir = os.path.dirname(__file__)
-    # curdir += "/cache/" + motAchercher + ".txt"
-    # if os.path.isfile(curdir):
-    #     fichier = open(curdir,'r' , encoding ="Latin-1")
-    #     contenuPage = str(fichier.readlines())
-    #
-    #     fichier.close()
-    # else:
-    #
-    #     nom = "cache/"+motAchercher +".txt"
-    #     fichier = open(nom,'w')
-    #     fichier.write("Je croie qu j'aime marie")
-    #     fichier.close()
+def retourner_objet_mot(mot):
+    curdir = os.path.dirname(__file__)
+    curdir += "/cache/" + mot + ".txt"
+    # si je possede un mot deja le mot ecrir
+    if os.path.isfile(curdir):
+        resultat = creer_objet_deja_ecri(mot)
+    else:
+        resultat = creer_le_mot(mot)
+        resultat.ecrire()
+    return resultat
