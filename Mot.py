@@ -3,16 +3,22 @@
 # noeuds = extract_relation_noeuds()
 # type_relation = extract_relation_type_relation()
 import os
+import fonction
 import ast
 
 
 class Mot:
     def __init__(self,word,out,iin,node,kind):
+        if "%" in word:
+            word = word.replace("%E","\\xe")
+            word = fonction.change_reponce(word)
         self.mot = word
         self.relation_sortant = out
         self.relation_entrant = iin
         self.noeuds = node
         self.type_relation = kind
+        self.mise_a_format()
+
 
     def toString(self):
         print("Je suis le mot :\n" + str(self.mot) + "\nmes relation sortant sont :\n" + str(self.relation_sortant) + "\nmes relation "
@@ -34,3 +40,10 @@ class Mot:
             fichier.write("\n")
             fichier.write(str(self.type_relation))
 
+    def mise_a_format(self):
+        list = []
+        for x in self.noeuds:
+            mot = fonction.change_reponce(x)
+            mot = mot.replace(":","")
+            list.append(mot)
+        self.noeuds = list
