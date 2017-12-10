@@ -29,7 +29,7 @@ class Mot:
         curdir = os.path.dirname(__file__)
         curdir += "/cache/" + self.mot + ".txt"
         if os.path.isfile(curdir):
-            print("le mot possede deja un fichier")
+            pass
         else:
             fichier = open(curdir,'w')
             fichier.write(str(self.relation_sortant))

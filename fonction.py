@@ -170,3 +170,4 @@ def retourner_objet_mot(mot):
         resultat = creer_le_mot(mot)
         resultat.ecrire()
     return resultat
+
