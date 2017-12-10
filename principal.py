@@ -8,7 +8,7 @@ from pyDatalog import pyDatalog
 # r_agent_un <==> r_agent-1
 
 mot_un = 'félins'
-mot_deux = 'cordés'
+mot_deux = 'évoluer'
 mot_un_change = fonction.change_requete(mot_un)
 mot_deux_change = fonction.change_requete(mot_deux)
 object_mot_un = fonction.retourner_objet_mot(mot_un_change)
@@ -33,11 +33,6 @@ pyDatalog.create_terms('A,B,C,D,E,F,r_isa,cat_generique,cat_action,cat_caracteri
                        'cat_associe,cat_inhibition,cat_preparation,r_syn,r_holo,r_lemma,r_agent-1,r_has_part,'
                        'r_carac,r_color,r_associated,r_inhib,r_potential_confusion,c_c,a_a,b_b,'
                        'r_but,r_sentiment,r_pos,r_agent_un')
-
-+ c_c("dk","dh")
-+ a_a("chat","chien")
-b_b(B,A) <= a_a(A,B)
-b_b(A,B) <= c_c(A,B)
 #---
 cat_preparation(A,B,C) <= r_pos(A,B,C)
 #---
@@ -57,6 +52,22 @@ cat_caracteristique(A,B,C) <= r_sentiment(A,B,C)
 cat_associe(A,B,C) <= r_associated(A,B,C)
 #---
 cat_inhibition(A,B,C) <= r_inhib(A,B,C)
+#evite les exeption
++ r_isa("a","b","c")
++ r_pos("a","b","c")
++ r_syn("a","b","c")
++ r_holo("a","b","c")
++ r_lemma("a","b","c")
++ r_agent_un("a","b","c")
++ r_has_part("a","b","c")
++ r_carac("a","b","c")
++ r_color("a","b","c")
++ r_but("a","b","c")
++ r_sentiment("a","b","c")
++ r_associated("a","b","c")
++ r_inhib("a","b","c")
+
+
 
 for c in object_mot_un.relation_sortant :
     if ';6;' in c :
@@ -150,9 +161,11 @@ except AttributeError:
     print("ops")
 
 try:
-    print(cat_caracteristique(str(id_mot_un), B, C) & cat_action(B, str(id_mot_deux), F))
+    print(cat_generique(str(id_mot_un),B,C)&cat_generique(B,str(id_mot_deux),F))
 except AttributeError:
     print("ops")
 
-#print(cat_generique(str(id_mot_un),B,C)&cat_action(B,str(id_mot_deux),F))
-print(b_b(A,B))
+try:
+    print(cat_caracteristique(str(id_mot_un), B, C) & cat_action(B, str(id_mot_deux), F))
+except AttributeError:
+    print("ops")
