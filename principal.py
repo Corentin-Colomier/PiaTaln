@@ -144,6 +144,15 @@ for c in object_mot_deux.relation_entrant :
     else:
         pass
 
+try:
+    print(cat_generique(str(id_mot_un),B,C)&cat_action(B,str(id_mot_deux),F))
+except AttributeError:
+    print("ops")
 
-print(cat_generique(str(id_mot_un),B,C)&cat_generique(B,str(id_mot_deux),F))
+try:
+    print(cat_caracteristique(str(id_mot_un), B, C) & cat_action(B, str(id_mot_deux), F))
+except AttributeError:
+    print("ops")
+
+#print(cat_generique(str(id_mot_un),B,C)&cat_action(B,str(id_mot_deux),F))
 print(b_b(A,B))
