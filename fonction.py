@@ -2,37 +2,11 @@ import ast
 import os
 import urllib.request
 import Mot
-
-liste_clef_requete = ['à','â','ç','è','é','ê','î','ô','ù','û']
-liste_clef_reponce = ['\\xe0','\\xe2','\\xe7','\\xe8','\\xe9','\\xea','\\xee','\\xf4','\\xf9','\\xfb']
-dico_requete = {}
-dico_requete['à'] = '%E0'
-dico_requete['â'] = '%E2'
-dico_requete['ç'] = '%E7'
-dico_requete['è'] = '%E8'
-dico_requete['é'] = '%E9'
-dico_requete['ê'] = '%EA'
-dico_requete['î'] = '%EE'
-dico_requete['ô'] = '%F4'
-dico_requete['ù'] = '%F9'
-dico_requete['û'] = '%FB'
-
-dico_reponce = {}
-dico_reponce['\\xe0'] = 'à'
-dico_reponce['\\xe2'] = 'â'
-dico_reponce['\\xe7'] = 'ç'
-dico_reponce['\\xe8'] = 'è'
-dico_reponce['\\xe9'] = 'é'
-dico_reponce['\\xea'] = 'ê'
-dico_reponce['\\xee'] = 'î'
-dico_reponce['\\xf4'] = 'ô'
-dico_reponce['\\xf9'] = 'ù'
-dico_reponce['\\xfb'] = 'û'
-
-
+from urllib.parse import quote
 
 def creer_le_mot(mot):
     page = importerRezo(mot)
+    page = page.decode('iso-8859-1')
     if teste_existance_du_mot(page) :
         relation_sortant = extract_relation_sortant(page)
         relation_entrant = extract_relation_entrant(page)
@@ -45,6 +19,7 @@ def creer_le_mot(mot):
         return None
 # va chercher le code source de la page pour le mot
 def importerRezo(mot_un):
+    mot_un = change_requete(mot_un)
     url = 'http://www.jeuxdemots.org/rezo-dump.php?gotermsubmit=Chercher&gotermrel=' + mot_un + '&rel='
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req) as response:
@@ -53,17 +28,8 @@ def importerRezo(mot_un):
 
 
 def change_requete(mot):
-    for x in liste_clef_requete:
-        if x in mot:
-            mot = mot.replace(x, dico_requete[x])
+    mot = quote(mot, safe='/', encoding='iso-8859-1', errors=None)
     return mot
-
-def change_reponce(mot):
-    for x in liste_clef_reponce:
-        if x in mot:
-            mot = mot.replace(x, dico_reponce[x])
-    return mot
-
 
 # creer le tableau des relation sortant le parametre est le code source de la page
 def extract_relation_sortant(page):
@@ -71,7 +37,7 @@ def extract_relation_sortant(page):
         index_debut = str(page).index("// les relations sortante")
         index_fin = str(page).index("// les relations entrantes")
         list_relation_sortant = str(page)[index_debut:index_fin]
-        list_relation_sortant = list_relation_sortant.split("\\n")
+        list_relation_sortant = list_relation_sortant.split("\n")
         del list_relation_sortant[0]
         del list_relation_sortant[0]
         del list_relation_sortant[-1]
@@ -80,7 +46,7 @@ def extract_relation_sortant(page):
         index_debut = str(page).index("// les relations sortante")
         index_fin = str(page).index("// END")
         list_relation_sortant = str(page)[index_debut:index_fin]
-        list_relation_sortant = list_relation_sortant.split("\\n")
+        list_relation_sortant = list_relation_sortant.split("\n")
         del list_relation_sortant[0]
         del list_relation_sortant[0]
         del list_relation_sortant[-1]
@@ -93,7 +59,7 @@ def extract_relation_entrant(page):
         index_debut = str(page).index("// les relations entrantes")
         index_fin = str(page).index("// END")
         list_relation_entrant = str(page)[index_debut:index_fin]
-        list_relation_entrant = list_relation_entrant.split("\\n")
+        list_relation_entrant = list_relation_entrant.split("\n")
         del list_relation_entrant[0]
         del list_relation_entrant[0]
         del list_relation_entrant[-1]
@@ -107,7 +73,7 @@ def extract_relation_noeuds(page):
     index_debut = str(page).index("// les noeuds/termes")
     index_fin = str(page).index("// les types de relations")
     list_relation_noeuds = str(page)[index_debut:index_fin]
-    list_relation_noeuds = list_relation_noeuds.split("\\n")
+    list_relation_noeuds = list_relation_noeuds.split("\n")
     del list_relation_noeuds[0]
     del list_relation_noeuds[0]
     del list_relation_noeuds[-1]
@@ -123,7 +89,7 @@ def extract_relation_type_relation(page):
     index_debut = str(page).index("// les types de relations")
     index_fin = str(page).index("// les relations sortantes")
     list_relation_type_relation = str(page)[index_debut:index_fin]
-    list_relation_type_relation = list_relation_type_relation.split("\\n")
+    list_relation_type_relation = list_relation_type_relation.split("\n")
     del list_relation_type_relation[0]
     del list_relation_type_relation[0]
     del list_relation_type_relation[-1]
@@ -171,3 +137,49 @@ def retourner_objet_mot(mot):
         resultat.ecrire()
     return resultat
 
+#recupere la liste des rafinement sementique
+def extract_raffinement(object_mot):
+    liste_raffinement = []
+    for x in object_mot.noeuds:
+        if str(object_mot.mot) + ">" in x:
+            liste_raffinement.append(x)
+    return liste_raffinement
+
+#fonction qui demand quelle rafinement prendre
+def propose_choix(list_raf):
+    i = 0
+    list_tuple = []
+    print('liste des raffinement possible')
+    for x in list_raf:
+        y = x.split(";")
+        tuple = (y[1],y[5],i)
+        list_tuple.append(tuple)
+        i=i+1
+        print(tuple)
+    raf = input("entre le numero (3iem valeur) du raffinement que vous voulez"
+          " ou entre -1 peut import : ")
+    raf = int(raf)
+    if raf != -1 and raf >= len(list_raf):
+        print("serieux ???")
+    if raf == -1:
+        return -1
+    else:
+        return list_tuple[raf][0]
+
+def recup_id_sans_choix(object_mot):
+    id_mot = -1
+    for x in object_mot.noeuds:
+        if ";'" + str(object_mot.mot) + "';" in x:
+            ligne = str(x).split(";")
+            id_mot = ligne[1]
+    return id_mot
+
+def select_id(object_mot):
+    liste_raffinement = extract_raffinement(object_mot)
+    if liste_raffinement:
+        id_mot = propose_choix(liste_raffinement)
+        if id_mot == -1:
+            id_mot = recup_id_sans_choix(object_mot)
+    else:
+        id_mot = recup_id_sans_choix(object_mot)
+    return id_mot

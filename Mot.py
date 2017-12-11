@@ -10,8 +10,7 @@ import ast
 class Mot:
     def __init__(self,word,out,iin,node,kind):
         if "%" in word:
-            word = word.replace("%E","\\xe")
-            word = fonction.change_reponce(word)
+            print(word)
         self.mot = word
         self.relation_sortant = out
         self.relation_entrant = iin
@@ -43,7 +42,6 @@ class Mot:
     def mise_a_format(self):
         list = []
         for x in self.noeuds:
-            mot = fonction.change_reponce(x)
-            mot = mot.replace(":","")
+            mot = x.replace(":","")
             list.append(mot)
         self.noeuds = list
