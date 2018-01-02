@@ -1,142 +1,133 @@
-import ast
-import os
-import urllib.request
-import Mot
-from urllib.parse import quote
+from pymongo import MongoClient
+import pymongo
 
-def creer_le_mot(mot):
-    page = importerRezo(mot)
-    page = page.decode('iso-8859-1')
-    if teste_existance_du_mot(page) :
-        relation_sortant = extract_relation_sortant(page)
-        relation_entrant = extract_relation_entrant(page)
-        noeuds = extract_relation_noeuds(page)
-        type_relation = extract_relation_type_relation(page)
-        objet = Mot.Mot(mot,relation_sortant,relation_entrant,noeuds,type_relation)
-        return objet
-    else:
-        print("le mot "+mot+" n'est pas present sur jeu de mot \n peut etre acause de accent que j'ai pas envie de gere")
-        return None
-# va chercher le code source de la page pour le mot
-def importerRezo(mot_un):
-    mot_un = change_requete(mot_un)
-    url = 'http://www.jeuxdemots.org/rezo-dump.php?gotermsubmit=Chercher&gotermrel=' + mot_un + '&rel='
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req) as response:
-        the_page = response.read()
-    return the_page
+mot_un = ""
+mot_deux = ""
 
+client = MongoClient("localhost",27017)
+db = client['taln']
+collection_eid = db['eid']
+collection_rid = db['rid']
 
-def change_requete(mot):
-    mot = quote(mot, safe='/', encoding='iso-8859-1', errors=None)
-    return mot
+#on envoi le eid on reçoit le nom
+def recup_nom_avc_eid(eid):
+    dd = collection_eid.find_one({"eid":eid})
+    return dd['nom']
 
-# creer le tableau des relation sortant le parametre est le code source de la page
-def extract_relation_sortant(page):
-    if "// les relations entrantes" in str(page):
-        index_debut = str(page).index("// les relations sortante")
-        index_fin = str(page).index("// les relations entrantes")
-        list_relation_sortant = str(page)[index_debut:index_fin]
-        list_relation_sortant = list_relation_sortant.split("\n")
-        del list_relation_sortant[0]
-        del list_relation_sortant[0]
-        del list_relation_sortant[-1]
-        del list_relation_sortant[-1]
-    else:
-        index_debut = str(page).index("// les relations sortante")
-        index_fin = str(page).index("// END")
-        list_relation_sortant = str(page)[index_debut:index_fin]
-        list_relation_sortant = list_relation_sortant.split("\n")
-        del list_relation_sortant[0]
-        del list_relation_sortant[0]
-        del list_relation_sortant[-1]
-        del list_relation_sortant[-1]
-    return list_relation_sortant
-
-# creer le tableau des relation entrant le parametre est le code source de la page
-def extract_relation_entrant(page):
-    if "// les relations entrantes" in str(page):
-        index_debut = str(page).index("// les relations entrantes")
-        index_fin = str(page).index("// END")
-        list_relation_entrant = str(page)[index_debut:index_fin]
-        list_relation_entrant = list_relation_entrant.split("\n")
-        del list_relation_entrant[0]
-        del list_relation_entrant[0]
-        del list_relation_entrant[-1]
-        del list_relation_entrant[-1]
-    else:
-        list_relation_entrant = []
-    return list_relation_entrant
-
-# creer le tableau des noeud le parametre est le code source de la page
-def extract_relation_noeuds(page):
-    index_debut = str(page).index("// les noeuds/termes")
-    index_fin = str(page).index("// les types de relations")
-    list_relation_noeuds = str(page)[index_debut:index_fin]
-    list_relation_noeuds = list_relation_noeuds.split("\n")
-    del list_relation_noeuds[0]
-    del list_relation_noeuds[0]
-    del list_relation_noeuds[-1]
-    del list_relation_noeuds[-1]
-    numero = 0
-    for ligne in list_relation_noeuds:
-        list_relation_noeuds[numero] = ligne.replace("\\'","")
-        numero = numero + 1
-    return list_relation_noeuds
-
-# creer le tableau des type de relation le parametre est le code source de la page
-def extract_relation_type_relation(page):
-    index_debut = str(page).index("// les types de relations")
-    index_fin = str(page).index("// les relations sortantes")
-    list_relation_type_relation = str(page)[index_debut:index_fin]
-    list_relation_type_relation = list_relation_type_relation.split("\n")
-    del list_relation_type_relation[0]
-    del list_relation_type_relation[0]
-    del list_relation_type_relation[-1]
-    del list_relation_type_relation[-1]
-    numero = 0
-    for ligne in list_relation_type_relation:
-        list_relation_type_relation[numero] = ligne.replace("\\'", "")
-        numero = numero + 1
-    return list_relation_type_relation
-
-# teste si le mot existe le parametre est le code source de la page
-def teste_existance_du_mot(page):
-    if '<div class="jdm-warning"><br>Le terme' in str(page):
-        return False
-    else:
-        return True
-
-def creer_objet_deja_ecri(mot):
-        curdir = os.path.dirname(__file__)
-        curdir += "/cache/" + mot + ".txt"
-        if os.path.isfile(curdir):
-            fichier = open(curdir,'r')
-            ligne = fichier.readline()
-            relation_sortant = ast.literal_eval(ligne)
-            ligne = fichier.readline()
-            relation_entrant = ast.literal_eval(ligne)
-            ligne = fichier.readline()
-            noeud = ast.literal_eval(ligne)
-            ligne = fichier.readline()
-            type_relation = ast.literal_eval(ligne)
-            objet = Mot.Mot(mot,relation_sortant,relation_entrant,noeud,type_relation)
-            return objet
+#on fusion les valeurs en fonctions de la
+#valeur absolut
+def fusion_list(list_un,list_deux):
+    iterator_un = int(0)
+    iterator_deux = int(0)
+    list_resultat = []
+    while iterator_un != list_un.count() and iterator_deux != list_deux.count():
+        # print(iterator_un)
+        # print(iterator_deux)
+        # print(list_deux.count())
+        if iterator_un == list_un.count() and iterator_deux != list_deux.count():
+            list_resultat.append(list_deux[iterator_deux])
+            iterator_deux = iterator_deux + 1
+        elif iterator_deux == list_deux.count() and iterator_un != list_un.count():
+            list_resultat.append(list_un[iterator_un])
+            iterator_un = iterator_un + 1
+        elif abs(list_deux[iterator_deux]['poid']) < abs(list_un[iterator_un]['poid']):
+            list_resultat.append(list_un[iterator_un])
+            iterator_deux = iterator_deux + 1
+        elif abs(list_un[iterator_un]['poid'])< abs(list_deux[iterator_deux]['poid']):
+            list_resultat.append(list_deux[iterator_deux])
+            iterator_deux = iterator_deux + 1
         else:
-            print("le mot ne possede pas de fichier")
-            return None
+            print("je doit pas passer par la ité 1 : " + str(iterator_un))
+            print("et iterator 2 : " + str(iterator_deux))
+    return list_resultat
 
-def retourner_objet_mot(mot):
-    curdir = os.path.dirname(__file__)
-    curdir += "/cache/" + mot + ".txt"
-    # si je possede un mot deja le mot ecrir
-    if os.path.isfile(curdir):
-        resultat = creer_objet_deja_ecri(mot)
+#on envoie le nom on reçoi l'eif
+def recup_eid_avc_nom(nom):
+    dd = collection_eid.find_one({"nom":nom})
+    return dd['eid']
+
+def relation_source_positif(eid):
+    cursor = collection_rid.find({"source":eid,"poid":{"$gt":0}}).sort("poid",pymongo.DESCENDING)
+    return cursor
+
+def relation_source(eid):
+    cursor = collection_rid.find({"source":eid}).sort("poidAbs",pymongo.ASCENDING)
+    return cursor
+#0 direct 1 pas par 1
+def taille_inf(z):
+    if len(z)==4:
+        return 0
+    elif len(z) == 9:
+        return 1
+def afficher_taille_un(z,i):
+    id_mot_passerel = z[1]
+    type_r_un = z[3]
+    type_r_deux = z[7]
+    poid_r_un = z[4]
+    poid_r_deux = z[8]
+    mot_passerel = recup_nom_avc_eid(id_mot_passerel)
+    print("iteration n " + str(i) + " : \n\t"+
+          str(mot_un) + " -- "+ str(type_r_un)+"/"+str(poid_r_un)+ " --> " + str(mot_passerel) +
+          " -- "+ str(type_r_deux)+"/"+str(poid_r_deux) + " --> " + str(mot_deux))
+def afficher_taille_zero(z,i):
+    type_r = z[2]
+    poid_r = z[3]
+    print("iteration n " + str(i) + " : \n\t"+
+          str(mot_un) + " -- "+ str(type_r)+"/"+str(poid_r) + " --> " + str(mot_deux))
+
+def relation_cible(eid):
+    cursor = collection_rid.find({"cible":eid}).sort("poidAbs",pymongo.ASCENDING)
+    return cursor
+
+
+def relation_source_negatif(eid):
+    cursor = collection_rid.find({"source":eid,"poid":{"$lt":0}}).sort("poid",pymongo.ASCENDING)
+    return cursor
+
+def relation_cible_positif(eid):
+    cursor = collection_rid.find({"cible":eid,"poid":{"$gt":0}}).sort("poid",pymongo.DESCENDING)
+    return cursor
+
+def relation_cible_negatif(eid):
+    cursor = collection_rid.find({"cible":eid,"poid":{"$lt":0}}).sort("poid",pymongo.ASCENDING)
+    return cursor
+
+def have_raffinement(eid):
+    id = 0
+    cursor = collection_rid.find({"source":eid,"t":1})
+    if cursor.count() == 0 or cursor.count() == 1:
+        id = eid
     else:
-        resultat = creer_le_mot(mot)
-        resultat.ecrire()
-    return resultat
+        id = liste_raf(cursor)
+        if id == -1:
+            id = eid
+    return id
 
+def liste_raf(cursor):
+    i = 0
+    liste_tuple = []
+    print("les raffinement possible sont :")
+    for ligne in cursor:
+        id_ligne = ligne['cible']
+        nom = get_domaine(id_ligne)
+        tuple = (id_ligne,nom)
+        print(str(tuple)+" "+str(i))
+        i = 1 + i
+        liste_tuple.append(tuple)
+    select = input("quelle raffinement voulez vous -1 pour aucune")
+    select = int(select)
+    if select == -1:
+        return -1
+    else:
+        return liste_tuple[select][0]
+
+def get_domaine(eid):
+    cursor = collection_eid.find_one({'eid':eid})
+    nom = cursor['nom']
+    nom = nom.split('>')[1]
+    nom = int(nom)
+    cursor = collection_eid.find_one({'eid': nom})
+    return cursor['nom']
 #recupere la liste des rafinement sementique
 def extract_raffinement(object_mot):
     liste_raffinement = []
@@ -156,6 +147,7 @@ def propose_choix(list_raf):
         list_tuple.append(tuple)
         i=i+1
         print(tuple)
+    raf = len(list_raf)
     raf = input("entre le numero (3iem valeur) du raffinement que vous voulez"
           " ou entre -1 peut import : ")
     raf = int(raf)

@@ -6,153 +6,154 @@ format_jdm = 'iso-8859-1'
 # r_agent_un <==> r_agent-1
 
 #prend les entres et creer les objet on fonction
-mot_un = 'félin'
-mot_deux = 'évoluer'
+mot_un = 'chat'
+mot_deux = 'voler'
 action = 'r_can'
+fonction.mot_un = mot_un
+fonction.mot_deux = mot_deux
+print("recuperation de la base de donné")
+id_mot_un_gene = fonction.recup_eid_avc_nom(mot_un)
+id_mot_deux_gene = fonction.recup_eid_avc_nom(mot_deux)
 
-object_mot_un = fonction.retourner_objet_mot(mot_un)
-object_mot_deux = fonction.retourner_objet_mot(mot_deux)
+id_mot_un= fonction.have_raffinement(id_mot_un_gene)
+id_mot_deux = fonction.have_raffinement(id_mot_deux_gene)
 
-print(object_mot_un.mot)
+# rela_un_positif = fonction.relation_source_positif(id_mot_un)
+# rela_un_negatif = fonction.relation_source_negatif(id_mot_un)
+# rela_deux_positif = fonction.relation_cible_positif(id_mot_deux)
+# rela_deux_negatif = fonction.relation_cible_negatif(id_mot_un)
 
-#recupere les id des mots tout en prend en compte le raffinement sementique
-id_mot_un = fonction.select_id(object_mot_un)
-id_mot_deux = fonction.select_id(object_mot_deux)
+rela_source = fonction.relation_source(id_mot_un)
+rela_cible = fonction.relation_cible(id_mot_deux)
 
-print(id_mot_un)
-print(id_mot_deux)
+#new_list = fonction.fusion_list(rela_un_negatif,rela_un_positif)
 
+print("fin de recup des donné")
+print("creer le fichier prolog")
 #creer la base de donne prolog
-pyDatalog.create_terms('PAR,RELATION_UN,RELATION_DEUX,ID_RELATION_UN,ID_RELATION_DEUX,A,B,C,D,E,F,W,Y,POID,POID_UN,POID_DEUX,r_isa,cat_generique,cat_action,cat_caracteristique,'
+pyDatalog.create_terms('ID_R,ID_S,ID_C,NUM,NOM_R,PAR,RELATION_UN,RELATION_DEUX,ID_RELATION_UN,ID_RELATION_DEUX,A,B,N,C,D,E'
+                       ',F,W,Y,X,POID,POID_UN,POID_DEUX,r_isa,cat_generique,cat_action,cat_caracteristique,'
                        'cat_associe,cat_inhibition,cat_preparation,r_syn,r_holo,r_lemma,r_agent-1,r_has_part,'
                        'r_carac,r_color,r_associated,r_inhib,r_potential_confusion,c_c,a_a,b_b,'
-                       'r_but,r_sentiment,r_pos,r_agent_un')
+                       'r_but,r_sentiment,r_pos,r_agent_un,test,stop')
 #---
-cat_preparation(A,B,C,'r_po',POID) <= r_pos(A,B,C,POID)
+cat_preparation(NUM,ID_S,ID_C,ID_R,'r_pos',POID) <= r_pos(NUM,ID_S,ID_C,ID_R,POID)
 #---
-cat_generique(A,B,C,'is_a',POID) <= r_isa(A,B,C,POID)
-cat_generique(A,B,C,'syn',POID) <= r_syn(A,B,C,POID)
-cat_generique(A,B,C,'holo',POID) <= r_holo(A,B,C,POID)
-cat_generique(A,B,C,'lemma',POID) <= r_lemma(A,B,C,POID)
+cat_generique(NUM,ID_S,ID_C,ID_R,'r_isa',POID) <= r_isa(NUM,ID_S,ID_C,ID_R,POID)
+cat_generique(NUM,ID_S,ID_C,ID_R,'r_syn',POID) <= r_syn(NUM,ID_S,ID_C,ID_R,POID)
+cat_generique(NUM,ID_S,ID_C,ID_R,'r_holo',POID) <= r_holo(NUM,ID_S,ID_C,ID_R,POID)
+cat_generique(NUM,ID_S,ID_C,ID_R,'r_lemma',POID) <= r_lemma(NUM,ID_S,ID_C,ID_R,POID)
 #---
-cat_action(A,B,C,'agent - 1',POID) <= r_agent_un(A,B,C,POID)
+cat_action(NUM,ID_S,ID_C,ID_R,'r_agent-1',POID) <= r_agent_un(NUM,ID_S,ID_C,ID_R,POID)
 #---
-cat_caracteristique(A,B,C,'has_part',POID) <= r_has_part(A,B,C,POID)
-cat_caracteristique(A,B,C,'carac',POID) <= r_carac(A,B,C,POID)
-cat_caracteristique(A,B,C,'color',POID) <= r_color(A,B,C,POID)
-cat_caracteristique(A,B,C,'but',POID) <= r_but(A,B,C,POID)
-cat_caracteristique(A,B,C,'sentiment',POID) <= r_sentiment(A,B,C,POID)
+cat_caracteristique(NUM,ID_S,ID_C,ID_R,'r_hase_part',POID) <= r_has_part(NUM,ID_S,ID_C,ID_R,POID)
+cat_caracteristique(NUM,ID_S,ID_C,ID_R,'r_carac',POID) <= r_carac(NUM,ID_S,ID_C,ID_R,POID)
+cat_caracteristique(NUM,ID_S,ID_C,ID_R,'r_color',POID) <= r_color(NUM,ID_S,ID_C,ID_R,POID)
+cat_caracteristique(NUM,ID_S,ID_C,ID_R,'r_but',POID) <= r_but(NUM,ID_S,ID_C,ID_R,POID)
+cat_caracteristique(NUM,ID_S,ID_C,ID_R,'r_sentiment',POID) <= r_sentiment(NUM,ID_S,ID_C,ID_R,POID)
 #---
-cat_associe(A,B,C,'asso',POID) <= r_associated(A,B,C,POID)
+cat_associe(NUM,ID_S,ID_C,ID_R,'r_associated',POID) <= r_associated(NUM,ID_S,ID_C,ID_R,POID)
 #---
-cat_inhibition(A,B,C,'ini',POID) <= r_inhib(A,B,C,POID)
+cat_inhibition(NUM,ID_S,ID_C,ID_R,'r_inihib',POID) <= r_inhib(NUM,ID_S,ID_C,ID_R,POID)
+#---
+a_a(N,A,B,PAR,POID_UN,POID_DEUX) <= cat_generique(N,A,PAR,ID_RELATION_UN,RELATION_UN,POID_UN)&cat_action(PAR,B,ID_RELATION_DEUX,RELATION_DEUX,POID_DEUX)
 #evite les exeption
-+ r_isa("a","b","c","d")
-+ r_pos("a","b","c","d")
-+ r_syn("a","b","c","d")
-+ r_holo("a","b","c","d")
-+ r_lemma("a","b","c","d")
-+ r_agent_un("a","b","c","d")
-+ r_has_part("a","b","c","d")
-+ r_carac("a","b","c","d")
-+ r_color("a","b","c","d")
-+ r_but("a","b","c","d")
-+ r_sentiment("a","b","c","d")
-+ r_associated("a","b","c","d")
-+ r_inhib("a","b","c","d")
++ r_isa(0,"a","b","c","d")
++ r_pos(0,"a","b","c","d")
++ r_syn(0,"a","b","c","d")
++ r_holo(0,"a","b","c","d")
++ r_lemma(0,"a","b","c","d")
++ r_agent_un(0,"a","b","c","d")
++ r_has_part(0,"a","b","c","d")
++ r_carac(0,"a","b","c","d")
++ r_color(0,"a","b","c","d")
++ r_but(0,"a","b","c","d")
++ r_sentiment(0,"a","b","c","d")
++ r_associated(0,"a","b","c","d")
++ r_inhib(0,"a","b","c","d")
 #creer les fait de la base
-for c in object_mot_un.relation_sortant :
-    if ';6;' in c :
-        ligne = str(c).split(";")
-        + r_isa(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';4;' in c :
-        ligne = str(c).split(";")
-        + r_pos(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';5;' in c :
-        ligne = str(c).split(";")
-        + r_syn(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';10;' in c :
-        ligne = str(c).split(";")
-        + r_holo(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';19;' in c :
-        ligne = str(c).split(";")
-        + r_lemma(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';24;' in c :
-        ligne = str(c).split(";")
-        + r_agent_un(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';9;' in c :
-        ligne = str(c).split(";")
-        + r_has_part(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';17;' in c :
-        ligne = str(c).split(";")
-        + r_carac(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';87;' in c :
-        ligne = str(c).split(";")
-        + r_color(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';100;' in c :
-        ligne = str(c).split(";")
-        + r_but(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';32;' in c :
-        ligne = str(c).split(";")
-        + r_sentiment(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';0;' in c :
-        ligne = str(c).split(";")
-        + r_associated(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';130;' in c :
-        ligne = str(c).split(";")
-        + r_inhib(ligne[2],ligne[3],ligne[1],ligne[5])
+i = rela_source.count()
+for c in rela_source :
+    if c['t'] == 6 :
+        + r_isa(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 4 :
+        + r_pos(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 5 :
+        + r_syn(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 10 :
+        + r_holo(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 19 :
+        + r_lemma(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] ==24 :
+        + r_agent_un(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 9 :
+        + r_has_part(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 17 :
+        + r_carac(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 87 :
+        + r_color(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 100:
+        + r_but(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 32 :
+        + r_sentiment(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 0:
+        + r_associated(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 130:
+        + r_inhib(i,c['source'],c['cible'],c['rid'],c['poid'])
     else:
         pass
-
-for c in object_mot_deux.relation_entrant :
-    if ';6;' in c :
-        ligne = str(c).split(";")
-        + r_isa(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';4;' in c :
-        ligne = str(c).split(";")
-        + r_pos(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';5;' in c :
-        ligne = str(c).split(";")
-        + r_syn(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';10;' in c :
-        ligne = str(c).split(";")
-        + r_holo(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';19;' in c :
-        ligne = str(c).split(";")
-        + r_lemma(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';24;' in c :
-        ligne = str(c).split(";")
-        + r_agent_un(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';9;' in c :
-        ligne = str(c).split(";")
-        + r_has_part(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';17;' in c :
-        ligne = str(c).split(";")
-        + r_carac(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';87;' in c :
-        ligne = str(c).split(";")
-        + r_color(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';100;' in c :
-        ligne = str(c).split(";")
-        + r_but(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';32;' in c :
-        ligne = str(c).split(";")
-        + r_sentiment(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';0;' in c :
-        ligne = str(c).split(";")
-        + r_associated(ligne[2],ligne[3],ligne[1],ligne[5])
-    elif ';130;' in c :
-        ligne = str(c).split(";")
-        + r_inhib(ligne[2],ligne[3],ligne[1],ligne[5])
+    i = i -1
+print("fin de la creation des regles pour source")
+i = rela_cible.count()
+for c in rela_cible:
+    if c['t'] == 6 :
+        + r_isa(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 4 :
+        + r_pos(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 5 :
+        + r_syn(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 10 :
+        + r_holo(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 19 :
+        + r_lemma(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] ==24 :
+        + r_agent_un(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 9 :
+        + r_has_part(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 17 :
+        + r_carac(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 87 :
+        + r_color(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 100:
+        + r_but(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 32 :
+        + r_sentiment(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 0:
+        + r_associated(i,c['source'],c['cible'],c['rid'],c['poid'])
+    elif c['t'] == 130:
+        + r_inhib(i,c['source'],c['cible'],c['rid'],c['poid'])
     else:
         pass
-
-#selection les inference a faire
+    i = i - 1
+print("fin de la creation des regles pour la cible")
+# #selection les inference a faire
+print("debut du calcul")
 if action == "r_can":
-    print(cat_generique(str(id_mot_un),PAR,ID_RELATION_UN,RELATION_UN,POID_UN)&cat_action(PAR,str(id_mot_deux),ID_RELATION_DEUX,RELATION_DEUX,POID_DEUX))
+    x = cat_generique(NUM,id_mot_un,ID_C,ID_R,NOM_R,POID).sort()&cat_action(N,ID_C,id_mot_deux,A,B,POID_DEUX).sort()
+    b = cat_action(NUM,id_mot_un,id_mot_deux,ID_R,NOM_R,POID)
 
-print(cat_generique(str(id_mot_un),PAR,C,W,POID)&cat_generique(PAR,str(id_mot_deux),F,Y,POID))
-print(cat_caracteristique(str(id_mot_un), PAR, C,W,POID) & cat_action(PAR, str(id_mot_deux),F,Y,POID))
+print("fin if")
+i = 0
+if 1 == 1:
+    for z in b.sort():
+        i = i + 1
+        taille_inference = fonction.taille_inf(z)
+        if taille_inference == 0:
+            fonction.afficher_taille_zero(z,i)
+    for z in x.sort():
+        i = i + 1
+        taille_inference = fonction.taille_inf(z)
+        if taille_inference == 1 :
+            fonction.afficher_taille_un(z,i)
 
-#todo utiliser mongodb
 #todo rajoute des regle
